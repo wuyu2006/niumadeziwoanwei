@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实时工资</title>
+    <title>实时工资计算器</title>
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -31,6 +31,12 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        body.fullscreen-mode {
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+            overflow: hidden;
         }
 
         .container {
@@ -41,6 +47,25 @@
             max-width: 600px;
             padding: 25px;
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .container.fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            max-width: none;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 0;
         }
 
         .settings-icon {
@@ -58,6 +83,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
+            z-index: 5;
         }
 
         .settings-icon:hover {
@@ -132,6 +158,44 @@
             background-color: var(--tertiary-color);
             border-radius: var(--border-radius);
             box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .salary-container:hover {
+            transform: translateY(-3px);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .fullscreen-salary {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            color: white;
+        }
+
+        .container.fullscreen-mode .fullscreen-salary {
+            display: flex;
+        }
+
+        .fullscreen-salary .salary-value {
+            font-size: 6rem;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .fullscreen-salary .increment {
+            font-size: 2rem;
+        }
+
+        .fullscreen-exit-hint {
+            position: absolute;
+            bottom: 30px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
         }
 
         .salary-label {
@@ -156,6 +220,10 @@
             left: 50%;
             transform: translateX(-50%);
             animation: fade-up 2s forwards;
+        }
+
+        .fullscreen-mode .increment {
+            color: rgba(255, 255, 255, 0.8);
         }
 
         @keyframes fade-up {
@@ -229,6 +297,10 @@
                 font-size: 2rem;
             }
 
+            .fullscreen-salary .salary-value {
+                font-size: 3.5rem;
+            }
+
             .work-info {
                 flex-direction: column;
                 align-items: center;
@@ -241,9 +313,9 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="mainContainer">
         <div id="settingsIcon" class="settings-icon">⚙️</div>
-        <h1>实时工资</h1>
+        <h1>实时工资计算器</h1>
         
         <div id="setupForm" class="setup-form">
             <div class="form-group">
@@ -279,7 +351,7 @@
         
         <div id="displaySection" class="display-section">
             <div class="time-display">
-                <div id="currentTime">实时时间: --:--:--</div>
+                <div id="currentTime">当前时间: --:--:--</div>
             </div>
             
             <div class="progress-container">
@@ -301,13 +373,21 @@
                 </div>
             </div>
             
-            <div class="salary-container">
-                <div class="salary-label">当日工资</div>
+            <div id="salaryContainer" class="salary-container">
+                <div class="salary-label">已赚取工资</div>
                 <div class="salary-value">
                     <span id="currentSalary">¥0.0000</span>
                     <div id="incrementContainer"></div>
                 </div>
             </div>
+        </div>
+        
+        <div id="fullscreenSalary" class="fullscreen-salary">
+            <div class="salary-value">
+                <span id="fullscreenSalaryValue">¥0.0000</span>
+                <div id="fullscreenIncrementContainer"></div>
+            </div>
+            <div class="fullscreen-exit-hint">按空格键退出全屏模式</div>
         </div>
     </div>
 
@@ -317,15 +397,20 @@
         const displaySection = document.getElementById('displaySection');
         const settingsIcon = document.getElementById('settingsIcon');
         const startBtn = document.getElementById('startBtn');
+        const mainContainer = document.getElementById('mainContainer');
+        const salaryContainer = document.getElementById('salaryContainer');
+        const fullscreenSalary = document.getElementById('fullscreenSalary');
         
         // 工资信息的DOM元素
         const currentSalary = document.getElementById('currentSalary');
+        const fullscreenSalaryValue = document.getElementById('fullscreenSalaryValue');
         const currentTime = document.getElementById('currentTime');
         const workHours = document.getElementById('workHours');
         const workDaysInfo = document.getElementById('workDaysInfo');
         const hourlyRate = document.getElementById('hourlyRate');
         const progressBar = document.getElementById('progressBar');
         const incrementContainer = document.getElementById('incrementContainer');
+        const fullscreenIncrementContainer = document.getElementById('fullscreenIncrementContainer');
         
         // 表单输入元素
         const monthlySalaryInput = document.getElementById('monthlySalary');
@@ -346,12 +431,15 @@
         let endHour = 0;
         let endMinute = 0;
         let calculationInterval = null;
+        let isFullscreenMode = false;
         
         // 从本地存储加载设置
         loadSettings();
         
         // 设置按钮点击事件
         settingsIcon.addEventListener('click', function() {
+            if (isFullscreenMode) return; // 全屏模式下不响应设置按钮
+            
             setupForm.style.display = 'block';
             displaySection.style.display = 'none';
             
@@ -361,6 +449,33 @@
                 calculationInterval = null;
             }
         });
+        
+        // 工资容器点击事件 - 进入全屏模式
+        salaryContainer.addEventListener('click', function() {
+            enterFullscreenMode();
+        });
+        
+        // 键盘事件 - 按空格键退出全屏模式
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && isFullscreenMode) {
+                exitFullscreenMode();
+                event.preventDefault(); // 阻止默认的空格行为（如滚动页面）
+            }
+        });
+        
+        // 进入全屏工资显示模式
+        function enterFullscreenMode() {
+            isFullscreenMode = true;
+            document.body.classList.add('fullscreen-mode');
+            mainContainer.classList.add('fullscreen-mode');
+        }
+        
+        // 退出全屏工资显示模式
+        function exitFullscreenMode() {
+            isFullscreenMode = false;
+            document.body.classList.remove('fullscreen-mode');
+            mainContainer.classList.remove('fullscreen-mode');
+        }
         
         // 开始计算按钮点击事件
         startBtn.addEventListener('click', function() {
@@ -494,20 +609,29 @@
             const now = new Date();
             currentTime.textContent = `当前时间: ${formatTime(now)}`;
             
-            // 更新当前工资
+            // 更新当前工资（正常模式和全屏模式都更新）
             currentSalary.textContent = `¥${totalAccumulatedSalary.toFixed(4)}`;
+            fullscreenSalaryValue.textContent = `¥${totalAccumulatedSalary.toFixed(4)}`;
         }
         
         // 显示工资增量
         function showIncrement(increment) {
+            // 普通模式下的增量
             const incrementElement = document.createElement('div');
             incrementElement.className = 'increment';
             incrementElement.textContent = `+${increment.toFixed(4)}`;
             incrementContainer.appendChild(incrementElement);
             
+            // 全屏模式下的增量
+            const fullscreenIncrementElement = document.createElement('div');
+            fullscreenIncrementElement.className = 'increment';
+            fullscreenIncrementElement.textContent = `+${increment.toFixed(4)}`;
+            fullscreenIncrementContainer.appendChild(fullscreenIncrementElement);
+            
             // 动画结束后移除元素
             setTimeout(() => {
                 incrementElement.remove();
+                fullscreenIncrementElement.remove();
             }, 2000);
         }
         
