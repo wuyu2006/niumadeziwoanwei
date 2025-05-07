@@ -31,12 +31,13 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            transition: background 0.3s ease;
+            transition: background 0.5s ease;
+            position: relative;
         }
 
         body.fullscreen-mode {
-            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
-            overflow: hidden;
+            background: #000;
+            padding: 0;
         }
 
         .container {
@@ -47,24 +48,19 @@
             max-width: 600px;
             padding: 25px;
             position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
         }
 
-        .container.fullscreen-mode {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            max-width: none;
+        .container.fullscreen {
+            max-width: 100%;
             width: 100%;
-            height: 100%;
+            height: 100vh;
             border-radius: 0;
+            background-color: #000;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
+            align-items: center;
             padding: 0;
         }
 
@@ -83,7 +79,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
-            z-index: 5;
+            z-index: 10;
         }
 
         .settings-icon:hover {
@@ -96,10 +92,12 @@
             color: var(--primary-color);
             margin-bottom: 20px;
             font-size: 1.8rem;
+            transition: all 0.5s ease;
         }
 
         .setup-form, .display-section {
             width: 100%;
+            transition: opacity 0.5s ease;
         }
 
         .display-section {
@@ -159,43 +157,25 @@
             border-radius: var(--border-radius);
             box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.5s ease;
         }
 
         .salary-container:hover {
-            transform: translateY(-3px);
+            transform: scale(1.02);
             box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
         }
 
-        .fullscreen-salary {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .fullscreen .salary-container {
+            background-color: transparent;
+            box-shadow: none;
+            padding: 0;
+            margin: 0;
             width: 100%;
             height: 100%;
-            color: white;
-        }
-
-        .container.fullscreen-mode .fullscreen-salary {
             display: flex;
-        }
-
-        .fullscreen-salary .salary-value {
-            font-size: 6rem;
-            margin-bottom: 30px;
-            color: white;
-        }
-
-        .fullscreen-salary .increment {
-            font-size: 2rem;
-        }
-
-        .fullscreen-exit-hint {
-            position: absolute;
-            bottom: 30px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 1rem;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .salary-label {
@@ -203,6 +183,25 @@
             color: var(--primary-color);
             margin-bottom: 10px;
             font-weight: 600;
+            transition: all 0.5s ease;
+        }
+
+        .fullscreen .salary-label {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .increment-container {
+            height: 50px;
+            position: relative;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .fullscreen .increment-container {
+            height: 80px;
+            margin-bottom: 10px;
         }
 
         .salary-value {
@@ -210,6 +209,12 @@
             font-weight: 700;
             color: var(--secondary-color);
             position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .fullscreen .salary-value {
+            font-size: 5rem;
+            color: #fff;
         }
 
         .increment {
@@ -222,8 +227,9 @@
             animation: fade-up 2s forwards;
         }
 
-        .fullscreen-mode .increment {
-            color: rgba(255, 255, 255, 0.8);
+        .fullscreen .increment {
+            font-size: 2rem;
+            color: rgba(92, 184, 92, 0.8);
         }
 
         @keyframes fade-up {
@@ -244,6 +250,7 @@
             background-color: var(--tertiary-color);
             padding: 15px;
             border-radius: var(--border-radius);
+            transition: all 0.5s ease;
         }
 
         .info-item {
@@ -267,6 +274,7 @@
             margin-top: 20px;
             font-size: 1.2rem;
             color: var(--primary-color);
+            transition: all 0.5s ease;
         }
 
         .progress-container {
@@ -275,6 +283,7 @@
             background-color: #e0e0e0;
             border-radius: 5px;
             overflow: hidden;
+            transition: all 0.5s ease;
         }
 
         .progress-bar {
@@ -282,6 +291,47 @@
             background-color: var(--secondary-color);
             width: 0%;
             transition: width 1s linear;
+        }
+
+        .fullscreen-instruction {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            padding: 10px;
+        }
+
+        .fullscreen .fullscreen-instruction {
+            display: block;
+            opacity: 1;
+        }
+
+        .hidden-in-fullscreen {
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .fullscreen .hidden-in-fullscreen {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .shortcut-hint {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--primary-color);
+            opacity: 0.8;
         }
 
         @media (max-width: 768px) {
@@ -297,7 +347,7 @@
                 font-size: 2rem;
             }
 
-            .fullscreen-salary .salary-value {
+            .fullscreen .salary-value {
                 font-size: 3.5rem;
             }
 
@@ -309,13 +359,21 @@
             .info-item {
                 margin-bottom: 10px;
             }
+
+            .fullscreen .salary-label {
+                font-size: 22px;
+            }
+            
+            .shortcut-hint {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container" id="mainContainer">
-        <div id="settingsIcon" class="settings-icon">⚙️</div>
-        <h1>实时工资计算器</h1>
+        <div id="settingsIcon" class="settings-icon hidden-in-fullscreen">⚙️</div>
+        <h1 class="hidden-in-fullscreen">实时工资计算器</h1>
         
         <div id="setupForm" class="setup-form">
             <div class="form-group">
@@ -350,15 +408,15 @@
         </div>
         
         <div id="displaySection" class="display-section">
-            <div class="time-display">
+            <div class="time-display hidden-in-fullscreen">
                 <div id="currentTime">当前时间: --:--:--</div>
             </div>
             
-            <div class="progress-container">
+            <div class="progress-container hidden-in-fullscreen">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
             
-            <div class="work-info">
+            <div class="work-info hidden-in-fullscreen">
                 <div class="info-item">
                     <div class="info-label">工作时长</div>
                     <div id="workHours" class="info-value">0小时</div>
@@ -373,23 +431,21 @@
                 </div>
             </div>
             
-            <div id="salaryContainer" class="salary-container">
+            <div class="salary-container" id="salaryContainer">
                 <div class="salary-label">已赚取工资</div>
+                <div class="increment-container" id="incrementContainer"></div>
                 <div class="salary-value">
                     <span id="currentSalary">¥0.0000</span>
-                    <div id="incrementContainer"></div>
                 </div>
             </div>
-        </div>
-        
-        <div id="fullscreenSalary" class="fullscreen-salary">
-            <div class="salary-value">
-                <span id="fullscreenSalaryValue">¥0.0000</span>
-                <div id="fullscreenIncrementContainer"></div>
+            
+            <div id="shortcutHint" class="shortcut-hint hidden-in-fullscreen">
+                提示: 按空格键可以进入全屏模式
             </div>
-            <div class="fullscreen-exit-hint">按空格键退出全屏模式</div>
         </div>
     </div>
+    
+    <div class="fullscreen-instruction" id="fullscreenInstruction">按空格键退出全屏模式</div>
 
     <script>
         // 保存设置的DOM元素
@@ -399,18 +455,17 @@
         const startBtn = document.getElementById('startBtn');
         const mainContainer = document.getElementById('mainContainer');
         const salaryContainer = document.getElementById('salaryContainer');
-        const fullscreenSalary = document.getElementById('fullscreenSalary');
+        const fullscreenInstruction = document.getElementById('fullscreenInstruction');
+        const shortcutHint = document.getElementById('shortcutHint');
         
         // 工资信息的DOM元素
         const currentSalary = document.getElementById('currentSalary');
-        const fullscreenSalaryValue = document.getElementById('fullscreenSalaryValue');
         const currentTime = document.getElementById('currentTime');
         const workHours = document.getElementById('workHours');
         const workDaysInfo = document.getElementById('workDaysInfo');
         const hourlyRate = document.getElementById('hourlyRate');
         const progressBar = document.getElementById('progressBar');
         const incrementContainer = document.getElementById('incrementContainer');
-        const fullscreenIncrementContainer = document.getElementById('fullscreenIncrementContainer');
         
         // 表单输入元素
         const monthlySalaryInput = document.getElementById('monthlySalary');
@@ -432,34 +487,87 @@
         let endMinute = 0;
         let calculationInterval = null;
         let isFullscreenMode = false;
+        let isMobileDevice = false;
+        let isCalculating = false;
         
-        // 从本地存储加载设置
-        loadSettings();
+        // 检测是否为移动设备
+        function detectMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   (window.innerWidth <= 768);
+        }
+        
+        // 初始化
+        function initialize() {
+            isMobileDevice = detectMobileDevice();
+            loadSettings();
+            
+            // 根据设备类型设置提示文本
+            if (isMobileDevice) {
+                fullscreenInstruction.textContent = "点击屏幕退出全屏模式";
+                shortcutHint.style.display = 'none';
+            } else {
+                fullscreenInstruction.textContent = "按空格键退出全屏模式";
+                shortcutHint.style.display = 'block';
+            }
+        }
+        
+        // 初始化
+        initialize();
         
         // 设置按钮点击事件
         settingsIcon.addEventListener('click', function() {
-            if (isFullscreenMode) return; // 全屏模式下不响应设置按钮
-            
             setupForm.style.display = 'block';
             displaySection.style.display = 'none';
+            isCalculating = false;
             
             // 停止计算
             if (calculationInterval) {
                 clearInterval(calculationInterval);
                 calculationInterval = null;
             }
+            
+            // 确保退出全屏模式
+            exitFullscreenMode();
         });
         
         // 工资容器点击事件 - 进入全屏模式
         salaryContainer.addEventListener('click', function() {
-            enterFullscreenMode();
+            if (!isFullscreenMode) {
+                enterFullscreenMode();
+            }
         });
         
-        // 键盘事件 - 按空格键退出全屏模式
+        // 监听键盘事件 - 空格键进入/退出全屏模式
         document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space' && isFullscreenMode) {
-                exitFullscreenMode();
-                event.preventDefault(); // 阻止默认的空格行为（如滚动页面）
+            if (event.code === 'Space') {
+                event.preventDefault(); // 防止页面滚动
+                
+                if (isCalculating) {
+                    if (isFullscreenMode) {
+                        exitFullscreenMode();
+                    } else {
+                        enterFullscreenMode();
+                    }
+                }
+            }
+        });
+        
+        // 添加全屏时点击事件处理
+        document.addEventListener('click', function(event) {
+            if (isFullscreenMode && isMobileDevice) {
+                // 检查点击是否在工资容器内
+                const rect = salaryContainer.getBoundingClientRect();
+                const clickInSalaryContainer = (
+                    event.clientX >= rect.left &&
+                    event.clientX <= rect.right &&
+                    event.clientY >= rect.top &&
+                    event.clientY <= rect.bottom
+                );
+                
+                // 如果点击不在工资容器内，则退出全屏
+                if (!clickInSalaryContainer) {
+                    exitFullscreenMode();
+                }
             }
         });
         
@@ -467,14 +575,22 @@
         function enterFullscreenMode() {
             isFullscreenMode = true;
             document.body.classList.add('fullscreen-mode');
-            mainContainer.classList.add('fullscreen-mode');
+            mainContainer.classList.add('fullscreen');
+            fullscreenInstruction.style.display = 'block';
+            setTimeout(() => {
+                fullscreenInstruction.style.opacity = 1;
+            }, 100);
         }
         
         // 退出全屏工资显示模式
         function exitFullscreenMode() {
             isFullscreenMode = false;
             document.body.classList.remove('fullscreen-mode');
-            mainContainer.classList.remove('fullscreen-mode');
+            mainContainer.classList.remove('fullscreen');
+            fullscreenInstruction.style.opacity = 0;
+            setTimeout(() => {
+                fullscreenInstruction.style.display = 'none';
+            }, 500);
         }
         
         // 开始计算按钮点击事件
@@ -527,6 +643,7 @@
             // 切换到显示界面
             setupForm.style.display = 'none';
             displaySection.style.display = 'block';
+            isCalculating = true;
             
             // 开始计算
             startCalculation();
@@ -609,29 +726,20 @@
             const now = new Date();
             currentTime.textContent = `当前时间: ${formatTime(now)}`;
             
-            // 更新当前工资（正常模式和全屏模式都更新）
+            // 更新当前工资
             currentSalary.textContent = `¥${totalAccumulatedSalary.toFixed(4)}`;
-            fullscreenSalaryValue.textContent = `¥${totalAccumulatedSalary.toFixed(4)}`;
         }
         
         // 显示工资增量
         function showIncrement(increment) {
-            // 普通模式下的增量
             const incrementElement = document.createElement('div');
             incrementElement.className = 'increment';
             incrementElement.textContent = `+${increment.toFixed(4)}`;
             incrementContainer.appendChild(incrementElement);
             
-            // 全屏模式下的增量
-            const fullscreenIncrementElement = document.createElement('div');
-            fullscreenIncrementElement.className = 'increment';
-            fullscreenIncrementElement.textContent = `+${increment.toFixed(4)}`;
-            fullscreenIncrementContainer.appendChild(fullscreenIncrementElement);
-            
             // 动画结束后移除元素
             setTimeout(() => {
                 incrementElement.remove();
-                fullscreenIncrementElement.remove();
             }, 2000);
         }
         
@@ -668,6 +776,23 @@
                 endTimeInput.value = settings.endTime || "17:00";
             }
         }
+        
+        // 窗口大小改变时重新检测设备类型
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobileDevice;
+            isMobileDevice = detectMobileDevice();
+            
+            // 如果设备类型发生变化，更新提示文本
+            if (wasMobile !== isMobileDevice) {
+                if (isMobileDevice) {
+                    fullscreenInstruction.textContent = "点击屏幕退出全屏模式";
+                    shortcutHint.style.display = 'none';
+                } else {
+                    fullscreenInstruction.textContent = "按空格键退出全屏模式";
+                    shortcutHint.style.display = 'block';
+                }
+            }
+        });
     </script>
 </body>
 </html>
