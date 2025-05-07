@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时工资计算器</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #5cb85c;
+            --tertiary-color: #f9f9f9;
+            --text-color: #333;
+            --border-radius: 10px;
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .settings-icon:hover {
+            transform: rotate(180deg);
+            background-color: #3a5a8c;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .setup-form, .display-section {
+            width: 100%;
+        }
+
+        .display-section {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #4cae4c;
+        }
+
+        .salary-container {
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            padding: 20px;
+            background-color: var(--tertiary-color);
+            border-radius: var(--border-radius);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .salary-label {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .salary-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            position: relative;
+        }
+
+        .increment {
+            position: absolute;
+            font-size: 1rem;
+            color: var(--secondary-color);
+            opacity: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: fade-up 2s forwards;
+        }
+
+        @keyframes fade-up {
+            0% {
+                opacity: 1;
+                bottom: 0;
+            }
+            100% {
+                opacity: 0;
+                bottom: 50px;
+            }
+        }
+
+        .work-info {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            background-color: var(--tertiary-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .time-display {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .salary-value {
+                font-size: 2rem;
+            }
+
+            .work-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .info-item {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="settingsIcon" class="settings-icon">⚙️</div>
+        <h1>实时工资计算器</h1>
+        
+        <div id="setupForm" class="setup-form">
+            <div class="form-group">
+                <label for="monthlySalary">月薪 (元)</label>
+                <input type="number" id="monthlySalary" placeholder="请输入您的月薪" min="0" step="0.01">
+            </div>
+            
+            <div class="form-group">
+                <label for="workDaysPerMonth">每月工作天数</label>
+                <select id="workDaysPerMonth">
+                    <option value="20">20天</option>
+                    <option value="21">21天</option>
+                    <option value="22">22天</option>
+                    <option value="23">23天</option>
+                    <option value="24">24天</option>
+                    <option value="25">25天</option>
+                    <option value="26">26天</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="startTime">上班时间</label>
+                <input type="time" id="startTime" value="08:00">
+            </div>
+            
+            <div class="form-group">
+                <label for="endTime">下班时间</label>
+                <input type="time" id="endTime" value="17:00">
+            </div>
+            
+            <button id="startBtn" class="btn">开始计算</button>
+        </div>
+        
+        <div id="displaySection" class="display-section">
+            <div class="time-display">
+                <div id="currentTime">当前时间: --:--:--</div>
+            </div>
+            
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            
+            <div class="work-info">
+                <div class="info-item">
+                    <div class="info-label">工作时长</div>
+                    <div id="workHours" class="info-value">0小时</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">工作日</div>
+                    <div id="workDaysInfo" class="info-value">0/0天</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">时薪</div>
+                    <div id="hourlyRate" class="info-value">¥0.00</div>
+                </div>
+            </div>
+            
+            <div class="salary-container">
+                <div class="salary-label">已赚取工资</div>
+                <div class="salary-value">
+                    <span id="currentSalary">¥0.0000</span>
+                    <div id="incrementContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 保存设置的DOM元素
+        const setupForm = document.getElementById('setupForm');
+        const displaySection = document.getElementById('displaySection');
+        const settingsIcon = document.getElementById('settingsIcon');
+        const startBtn = document.getElementById('startBtn');
+        
+        // 工资信息的DOM元素
+        const currentSalary = document.getElementById('currentSalary');
+        const currentTime = document.getElementById('currentTime');
+        const workHours = document.getElementById('workHours');
+        const workDaysInfo = document.getElementById('workDaysInfo');
+        const hourlyRate = document.getElementById('hourlyRate');
+        const progressBar = document.getElementById('progressBar');
+        const incrementContainer = document.getElementById('incrementContainer');
+        
+        // 表单输入元素
+        const monthlySalaryInput = document.getElementById('monthlySalary');
+        const workDaysPerMonthSelect = document.getElementById('workDaysPerMonth');
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+        
+        // 工资计算相关变量
+        let salaryPerSecond = 0;
+        let totalAccumulatedSalary = 0;
+        let startDateTime = null;
+        let endDateTime = null;
+        let lastUpdateTime = null;
+        let monthlySalary = 0;
+        let workDaysPerMonth = 0;
+        let startHour = 0;
+        let startMinute = 0;
+        let endHour = 0;
+        let endMinute = 0;
+        let calculationInterval = null;
+        
+        // 从本地存储加载设置
+        loadSettings();
+        
+        // 设置按钮点击事件
+        settingsIcon.addEventListener('click', function() {
+            setupForm.style.display = 'block';
+            displaySection.style.display = 'none';
+            
+            // 停止计算
+            if (calculationInterval) {
+                clearInterval(calculationInterval);
+                calculationInterval = null;
+            }
+        });
+        
+        // 开始计算按钮点击事件
+        startBtn.addEventListener('click', function() {
+            // 获取并验证输入
+            monthlySalary = parseFloat(monthlySalaryInput.value);
+            workDaysPerMonth = parseInt(workDaysPerMonthSelect.value);
+            
+            // 获取时间值
+            const startTimeValue = startTimeInput.value; // 格式为 "HH:MM"
+            const endTimeValue = endTimeInput.value;
+            
+            // 解析时间字符串
+            const [startHourStr, startMinuteStr] = startTimeValue.split(':');
+            const [endHourStr, endMinuteStr] = endTimeValue.split(':');
+            
+            startHour = parseInt(startHourStr);
+            startMinute = parseInt(startMinuteStr);
+            endHour = parseInt(endHourStr);
+            endMinute = parseInt(endMinuteStr);
+            
+            if (isNaN(monthlySalary) || monthlySalary <= 0) {
+                alert('请输入有效的月薪！');
+                return;
+            }
+            
+            // 比较时间
+            const startTotalMinutes = startHour * 60 + startMinute;
+            const endTotalMinutes = endHour * 60 + endMinute;
+            
+            if (startTotalMinutes >= endTotalMinutes) {
+                alert('下班时间必须晚于上班时间！');
+                return;
+            }
+            
+            // 保存设置到本地存储
+            saveSettings();
+            
+            // 计算每秒工资
+            const workHoursPerDay = (endTotalMinutes - startTotalMinutes) / 60;
+            const workHoursPerMonth = workHoursPerDay * workDaysPerMonth;
+            const salaryPerHour = monthlySalary / workHoursPerMonth;
+            salaryPerSecond = salaryPerHour / 3600;
+            
+            // 更新UI
+            hourlyRate.textContent = `¥${salaryPerHour.toFixed(2)}`;
+            workDaysInfo.textContent = `${workDaysPerMonth}天/月`;
+            workHours.textContent = `${workHoursPerDay.toFixed(1)}小时/天`;
+            
+            // 切换到显示界面
+            setupForm.style.display = 'none';
+            displaySection.style.display = 'block';
+            
+            // 开始计算
+            startCalculation();
+        });
+        
+        // 开始计算工资
+        function startCalculation() {
+            // 获取当前日期的上班和下班时间
+            const now = new Date();
+            startDateTime = new Date(now);
+            startDateTime.setHours(startHour, startMinute, 0, 0);
+            
+            endDateTime = new Date(now);
+            endDateTime.setHours(endHour, endMinute, 0, 0);
+            
+            // 重置累计工资
+            totalAccumulatedSalary = 0;
+            
+            // 如果当前时间在工作时间范围内，则从上班时间到现在的工资已经赚取
+            if (now >= startDateTime && now <= endDateTime) {
+                const secondsWorked = Math.floor((now - startDateTime) / 1000);
+                totalAccumulatedSalary = secondsWorked * salaryPerSecond;
+            } else if (now > endDateTime) {
+                // 如果已经下班，则工作时间全部计算
+                const secondsWorked = Math.floor((endDateTime - startDateTime) / 1000);
+                totalAccumulatedSalary = secondsWorked * salaryPerSecond;
+            }
+            
+            // 更新显示
+            updateDisplay();
+            
+            // 每秒更新一次
+            lastUpdateTime = Date.now();
+            calculationInterval = setInterval(updateCalculation, 1000);
+        }
+        
+        // 更新工资计算
+        function updateCalculation() {
+            const now = new Date();
+            
+            // 计算进度条
+            const totalWorkSeconds = (endDateTime - startDateTime) / 1000;
+            let elapsedSeconds = 0;
+            
+            if (now <= startDateTime) {
+                // 还没上班
+                elapsedSeconds = 0;
+            } else if (now >= endDateTime) {
+                // 已经下班
+                elapsedSeconds = totalWorkSeconds;
+            } else {
+                // 工作中
+                elapsedSeconds = (now - startDateTime) / 1000;
+            }
+            
+            const progress = Math.min(100, (elapsedSeconds / totalWorkSeconds) * 100);
+            progressBar.style.width = `${progress}%`;
+            
+            // 只在工作时间内增加工资
+            if (now >= startDateTime && now <= endDateTime) {
+                const currentTimeMs = Date.now();
+                const secondsElapsed = (currentTimeMs - lastUpdateTime) / 1000;
+                const increment = secondsElapsed * salaryPerSecond;
+                
+                totalAccumulatedSalary += increment;
+                
+                // 显示增量
+                showIncrement(increment);
+                
+                lastUpdateTime = currentTimeMs;
+            }
+            
+            // 更新显示
+            updateDisplay();
+        }
+        
+        // 更新显示
+        function updateDisplay() {
+            // 更新当前时间
+            const now = new Date();
+            currentTime.textContent = `当前时间: ${formatTime(now)}`;
+            
+            // 更新当前工资
+            currentSalary.textContent = `¥${totalAccumulatedSalary.toFixed(4)}`;
+        }
+        
+        // 显示工资增量
+        function showIncrement(increment) {
+            const incrementElement = document.createElement('div');
+            incrementElement.className = 'increment';
+            incrementElement.textContent = `+${increment.toFixed(4)}`;
+            incrementContainer.appendChild(incrementElement);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                incrementElement.remove();
+            }, 2000);
+        }
+        
+        // 格式化时间
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 保存设置到本地存储
+        function saveSettings() {
+            const settings = {
+                monthlySalary: monthlySalary,
+                workDaysPerMonth: workDaysPerMonth,
+                startTime: startTimeInput.value,
+                endTime: endTimeInput.value
+            };
+            
+            localStorage.setItem('salaryCalculatorSettings', JSON.stringify(settings));
+        }
+        
+        // 从本地存储加载设置
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('salaryCalculatorSettings');
+            
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                monthlySalaryInput.value = settings.monthlySalary;
+                workDaysPerMonthSelect.value = settings.workDaysPerMonth;
+                startTimeInput.value = settings.startTime || "08:00";
+                endTimeInput.value = settings.endTime || "17:00";
+            }
+        }
+    </script>
+</body>
+</html>
